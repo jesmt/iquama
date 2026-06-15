@@ -2,7 +2,7 @@ import streamlit as st
 from groq import Groq
 import os
 import pypdf
-from unidecode import unidecode  # <- ESSA LINHA AQUI ESTAVA FALTANDO!
+from unidecode import unidecode
 
 # 1. Configuração da página do Chatbot
 st.set_page_config(page_title="Assistente IQUAMA", page_icon="🤖")
@@ -16,7 +16,7 @@ else:
     st.error("Por favor, configure a chave GROQ_API_KEY nos Secrets do Streamlit.")
     st.stop()
 
-# 3. Mapear o PDF por páginas separadas (Para não estourar o limite de contexto)
+# 3. Mapear o PDF por páginas separadas
 @st.cache_data
 def carregar_paginas_pdf():
     caminho_pdf = "LeisIQUAMA.pdf" 
@@ -37,47 +37,63 @@ def carregar_paginas_pdf():
 
 base_paginas = carregar_paginas_pdf()
 
-# 4. Função de Busca Ultra Avançada (Especial para Tabelas e Anexos)
-def buscar_trechos_relevantes(pergunta, paginas, max_paginas=8): # Aumentado para 8 páginas de contexto
+# 4. NOVA FUNÇÃO DE BUSCA CALIBRADA (Evita o sufocamento de tabelas)
+def buscar_trechos_relevantes(pergunta, paginas, max_paginas=15): # Aumentado para 15 páginas (Groq aguenta fácil)
     pergunta_limpa = unidecode(pergunta).lower()
     
-    # Palavras-chave ignorando termos muito curtos
-    palavras_chave = [p for p in pergunta_limpa.split() if len(p) > 2] 
+    # Remove termos comuns irrelevantes e foca nas palavras de busca reais
+    palavras_chave = [p for p in pergunta_limpa.split() if len(p) > 2 and p not in ["qual", "como", "onde", "quem", "pelo", "pela"]] 
     
     if not palavras_chave:
         return "Nenhum contexto específico selecionado."
     
     paginas_pontuadas = []
     for p in paginas:
-        score = 0
         texto_pag_limpo = unidecode(p["texto"]).lower()
         
-        # 1. Conta ocorrências das palavras na página
-        for palavra in palavras_chave:
+        # Identifica quantas palavras-chave diferentes da pergunta estão presentes nesta página
+        palavras_encontradas = [palavra for palavra in palavras_chave if palavra in texto_pag_limpo]
+        total_unicas = len(palavras_encontradas)
+        
+        if total_unicas == 0:
+            continue
+            
+        score = 0
+        
+        # CRUCIAL 1: Bônus por Cobertura/Diversidade (Mais palavras únicas = muito mais pontos)
+        # Isso impede que uma página que repete "consulta" 30 vezes vença de uma que tem "consulta", "prévia" e "valor" juntas.
+        proporcao_cobertura = total_unicas / len(palavras_chave)
+        score += proporcao_cobertura * 120
+        
+        # CRUCIAL 2: Contagem de repetição com limite (Capado em no máximo 4 para não inflar texto corrido)
+        for palavra in palavras_encontradas:
             ocorrencias = texto_pag_limpo.count(palavra)
-            score += ocorrencias * 3 # 3 pontos por cada vez que a palavra aparece
+            score += min(ocorrencias, 4) * 2 
                 
-        # 2. Bônus por termos combinados ("consulta prévia")
+        # CRUCIAL 3: Bônus por termos compostos exatos na ordem ("consulta previa")
         for i in range(len(palavras_chave) - 1):
             termo_composto = f"{palavras_chave[i]} {palavras_chave[i+1]}"
             if termo_composto in texto_pag_limpo:
-                score += 15 # Super bônus para termos juntos
+                score += 40 
 
-        # 3. CRUCIAL: Se a página for um ANEXO ou TABELA e tiver a palavra-chave, ganha prioridade máxima
-        if score > 0:
-            if "anexo" in texto_pag_limpo or "tabela" in texto_pag_limpo:
-                score += 25 # Bônus para priorizar anexos fiscais e de taxas
+        # CRUCIAL 4: Super Bônus de Tabelas Fiscais
+        # Se a página tiver palavras indicativas de tabelas de valores E pelo menos algumas palavras da pergunta
+        indicadores_tabela = ["anexo", "tabela", "ufirm", "item", "valor", "taxa", "rs", "tabelas"]
+        tem_indicador_tabela = any(ind in texto_pag_limpo for ind in indicadores_tabela)
+        
+        if tem_indicador_tabela and total_unicas >= 1:
+            score += 60 # Dá uma vantagem massiva para páginas que contêm tabelas/valores
 
-            paginas_pontuadas.append((score, p))
+        paginas_pontuadas.append((score, p))
             
-    # Ordena as páginas por relevância
+    # Ordena as páginas pelo novo Score ajustado
     paginas_pontuadas.sort(key=lambda x: x[0], reverse=True)
     
     if not paginas_pontuadas:
         return "Nenhum trecho correspondente encontrado no documento."
         
     trechos_selecionados = []
-    # Pega as melhores páginas encontradas
+    # Retorna o topo das páginas mais relevantes dentro do novo limite expandido
     for score, p in paginas_pontuadas[:max_paginas]:
         trechos_selecionados.append(f"[Página {p['numero']}]\n{p['texto']}")
         
@@ -87,7 +103,7 @@ def buscar_trechos_relevantes(pergunta, paginas, max_paginas=8): # Aumentado par
 PROMPT_SISTEMA = """
 Você é um assistente virtual oficial para ajudar os cidadãos a tirarem dúvidas sobre as Leis de Controle Urbanístico e Ambiental (IQUAMA) de Aracati.
 Regras Cruciais:
-1. Seja extremamente preciso. Se a resposta estiver em uma tabela ou anexo, cite detalhadamente (Ex: "O valor é de 300 UFIRM, conforme o Item 10 do Anexo III da Lei Complementar nº 017/2019").
+1. Seja extremamente preciso. Se a resposta estiver em uma tabela ou anexo, cite detalhadamente (Ex: "O valor é de X UFIRM, conforme o Item 10 da Tabela do Anexo III da Lei Complementar nº 017/2019").
 2. Sempre cite a Página, Artigo, Item ou Anexo de onde retirou a informação para dar segurança jurídica ao cidadão.
 3. Você deve se basear apenas nos fragmentos de lei fornecidos no contexto.
 4. Se a informação NÃO estiver explícita nos fragmentos fornecidos, diga textualmente: "Desculpe, não encontrei essa informação específica nos trechos da legislação consultados. Recomendo consultar diretamente o órgão do IQUAMA." Não invente dados ou valores.
@@ -115,10 +131,10 @@ if prompt := st.chat_input("Ex: Qual o valor da consulta prévia?"):
             # Busca dinamicamente apenas as páginas do PDF que importam para aquela pergunta
             contexto_filtrado = buscar_trechos_relevantes(prompt, base_paginas)
             
-            # Monta a mensagem final super leve
+            # Monta a mensagem final leve mas completa
             contexto_mensagem = f"TRECHOS EXTRAÍDOS DA LEI:\n{contexto_filtrado}\n\nPERGUNTA DO CIDADÃO: {prompt}"
             
-            # Chamada ultra rápida usando o modelo estável da Groq
+            # Chamada usando o modelo estável da Groq
             chat_completion = client.chat.completions.create(
                 messages=[
                     {"role": "system", "content": PROMPT_SISTEMA},
