@@ -36,10 +36,12 @@ def carregar_paginas_pdf():
 
 base_paginas = carregar_paginas_pdf()
 
-# 4. Função de Busca Inteligente (Pega apenas o que interessa para a pergunta)
-def buscar_trechos_relevantes(pergunta, paginas, max_paginas=4):
-    # Divide a pergunta em palavras-chave importantes (ignora conectivos curtos)
-    palavras_chave = [p.lower() for p in pergunta.split() if len(p) > 3]
+# 4. Função de Busca Ultra Avançada (Especial para Tabelas e Anexos)
+def buscar_trechos_relevantes(pergunta, paginas, max_paginas=8): # Aumentado para 8 páginas de contexto
+    pergunta_limpa = unidecode(pergunta).lower()
+    
+    # Palavras-chave ignorando termos muito curtos
+    palavras_chave = [p for p in pergunta_limpa.split() if len(p) > 2] 
     
     if not palavras_chave:
         return "Nenhum contexto específico selecionado."
@@ -47,19 +49,34 @@ def buscar_trechos_relevantes(pergunta, paginas, max_paginas=4):
     paginas_pontuadas = []
     for p in paginas:
         score = 0
-        texto_pag_lower = p["texto"].lower()
-        for palavra in palavras_chave:
-            if palavra in texto_pag_lower:
-                score += 1 # Ganha pontos se a palavra da pergunta estiver na página
+        texto_pag_limpo = unidecode(p["texto"]).lower()
         
+        # 1. Conta ocorrências das palavras na página
+        for palavra in palavras_chave:
+            ocorrencias = texto_pag_limpo.count(palavra)
+            score += ocorrencias * 3 # 3 pontos por cada vez que a palavra aparece
+                
+        # 2. Bônus por termos combinados ("consulta prévia")
+        for i in range(len(palavras_chave) - 1):
+            termo_composto = f"{palavras_chave[i]} {palavras_chave[i+1]}"
+            if termo_composto in texto_pag_limpo:
+                score += 15 # Super bônus para termos juntos
+
+        # 3. CRUCIAL: Se a página for um ANEXO ou TABELA e tiver a palavra-chave, ganha prioridade máxima
         if score > 0:
+            if "anexo" in texto_pag_limpo or "tabela" in texto_pag_limpo:
+                score += 25 # Bônus para priorizar anexos fiscais e de taxas
+
             paginas_pontuadas.append((score, p))
             
-    # Ordena as páginas que têm mais a ver com a pergunta
+    # Ordena as páginas por relevância
     paginas_pontuadas.sort(key=lambda x: x[0], reverse=True)
     
-    # Junta o texto das melhores páginas encontradas
+    if not paginas_pontuadas:
+        return "Nenhum trecho correspondente encontrado no documento."
+        
     trechos_selecionados = []
+    # Pega as melhores páginas encontradas
     for score, p in paginas_pontuadas[:max_paginas]:
         trechos_selecionados.append(f"[Página {p['numero']}]\n{p['texto']}")
         
