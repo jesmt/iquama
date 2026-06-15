@@ -2,6 +2,7 @@ import streamlit as st
 from groq import Groq
 import os
 import pypdf
+from unidecode import unidecode  # <- ESSA LINHA AQUI ESTAVA FALTANDO!
 
 # 1. Configuração da página do Chatbot
 st.set_page_config(page_title="Assistente IQUAMA", page_icon="🤖")
