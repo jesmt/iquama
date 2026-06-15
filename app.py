@@ -28,8 +28,7 @@ def extrair_texto_pdf():
                 if texto:
                     texto_completo += texto + "\n"
             
-            # Otimização crucial: Remove espaços múltiplos e quebras de linha repetidas
-            # Isso reduz o tamanho do texto enviado pela metade sem perder nenhuma palavra da lei!
+            # Otimização para economizar tamanho de texto
             linhas_limpas = [linha.strip() for linha in texto_completo.split("\n") if linha.strip()]
             return "\n".join(linhas_limpas)
     else:
@@ -66,9 +65,9 @@ if prompt := st.chat_input("Ex: Qual o valor da consulta prévia?"):
         message_placeholder = st.empty()
         
         try:
-            # Voltamos para o 1.5-flash que aceita chaves gratuitas na hora
+            # CORREÇÃO CRUCIAL: Adicionado "models/" antes do nome do modelo para alinhar com a API v1beta
             model = genai.GenerativeModel(
-                model_name="gemini-1.5-flash",
+                model_name="models/gemini-1.5-flash",
                 system_instruction=PROMPT_SISTEMA
             )
             
