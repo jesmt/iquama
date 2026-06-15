@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from groq import Groq
 import os
 import pypdf
 
@@ -8,11 +8,12 @@ st.set_page_config(page_title="Assistente IQUAMA", page_icon="🤖")
 st.title("🤖 Assistente Virtual - Leis do IQUAMA")
 st.caption("Tire suas dúvidas sobre o Controle Urbanístico e Ambiental de Aracati.")
 
-# 2. Configurar a chave da API do Gemini
-if "GEMINI_API_KEY" in st.secrets:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+# 2. Configurar a chave da API da Groq
+if "GROQ_API_KEY" in st.secrets:
+    # Inicializa o cliente oficial da Groq
+    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 else:
-    st.error("Por favor, configure a chave GEMINI_API_KEY nos Secrets do Streamlit.")
+    st.error("Por favor, configure a chave GROQ_API_KEY nos Secrets do Streamlit.")
     st.stop()
 
 # 3. Extrair e otimizar o texto do PDF localmente
@@ -28,7 +29,7 @@ def extrair_texto_pdf():
                 if texto:
                     texto_completo += texto + "\n"
             
-            # Otimização para economizar tamanho de texto
+            # Otimização para economizar tamanho de texto (Tokens)
             linhas_limpas = [linha.strip() for linha in texto_completo.split("\n") if linha.strip()]
             return "\n".join(linhas_limpas)
     else:
@@ -37,7 +38,7 @@ def extrair_texto_pdf():
 
 texto_leis = extrair_texto_pdf()
 
-# Instruções de comportamento para o Bot
+# Instruções de comportamento para o Bot (Prompt de Sistema)
 PROMPT_SISTEMA = """
 Você é um assistente virtual oficial para ajudar os cidadãos a tirarem dúvidas sobre as Leis de Controle Urbanístico e Ambiental (IQUAMA) de Aracati.
 Regras Cruciais:
@@ -65,18 +66,20 @@ if prompt := st.chat_input("Ex: Qual o valor da consulta prévia?"):
         message_placeholder = st.empty()
         
         try:
-            # CORREÇÃO CRUCIAL: Adicionado "models/" antes do nome do modelo para alinhar com a API v1beta
-            model = genai.GenerativeModel(
-                model_name="models/gemini-1.5-flash",
-                system_instruction=PROMPT_SISTEMA
-            )
-            
-            # Construímos o contexto compactado
+            # Construímos o contexto juntando as leis com a pergunta atual
             contexto_mensagem = f"BASE DE LEIS DISPONÍVEL:\n{texto_leis}\n\nPERGUNTA DO CIDADÃO: {prompt}"
             
-            response = model.generate_content(contexto_mensagem)
+            # Chamada usando o modelo Llama 3 da Meta via Groq (Super Rápido e Gratuito)
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": PROMPT_SISTEMA},
+                    {"role": "user", "content": contexto_mensagem}
+                ],
+                model="llama-3.3-70b-versatile",
+                temperature=0.2, # Baixa temperatura para o bot ser ultra focado e não inventar nada
+            )
             
-            texto_resposta = response.text
+            texto_resposta = chat_completion.choices[0].message.content
             message_placeholder.markdown(texto_resposta)
             st.session_state.messages.append({"role": "assistant", "content": texto_resposta})
             
