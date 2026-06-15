@@ -2,3 +2,4 @@ google-generativeai
 streamlit
 pypdf
 groq
+unidecode
