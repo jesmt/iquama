@@ -15,16 +15,18 @@ else:
     st.error("Por favor, configure a chave GEMINI_API_KEY nos Secrets do Streamlit.")
     st.stop()
 
-# 3. Extrair o texto do PDF localmente (Bypassa o limite de 4MB da API)
+# 3. Extrair o texto do PDF localmente
 @st.cache_data
 def extrair_texto_pdf():
     caminho_pdf = "LeisIQUAMA.pdf" 
     if os.path.exists(caminho_pdf):
-        with st.spinner("Carregando e processando a base jurídica (isso ocorre apenas uma vez)..."):
+        with st.spinner("Carregando e processando a base jurídica..."):
             reader = pypdf.PdfReader(caminho_pdf)
             texto_completo = ""
             for pagina in reader.pages:
-                texto_completo += pagina.extract_text() + "\n"
+                texto = pagina.extract_text()
+                if texto:
+                    texto_completo += texto + "\n"
             return texto_completo
     else:
         st.error("Arquivo LeisIQUAMA.pdf não encontrado no servidor do GitHub.")
@@ -32,20 +34,13 @@ def extrair_texto_pdf():
 
 texto_leis = extrair_texto_pdf()
 
-# Instruções com o texto das leis injetado diretamente no cérebro do bot
-PROMPT_SISTEMA = f"""
-Você é um assistente virtual oficial e gratuito para ajudar os cidadãos a tirarem dúvidas sobre as Leis de Controle Urbanístico e Ambiental (IQUAMA) de Aracati.
-
+# Instruções de comportamento para o Bot
+PROMPT_SISTEMA = """
+Você é um assistente virtual oficial para ajudar os cidadãos a tirarem dúvidas sobre as Leis de Controle Urbanístico e Ambiental (IQUAMA) de Aracati.
 Regras Cruciais:
 1. Seja extremamente preciso. Se a resposta estiver em uma tabela ou anexo, cite detalhadamente (Ex: "O valor é de 300 UFIRM, conforme o Item 10 do Anexo III da Lei Complementar nº 017/2019").
-2. Sempre cite o Artigo, Parágrafo, Item ou Anexo de onde retirou a informação para dar segurança jurídica ao cidadão.
-3. Você deve responder perguntas baseando-se estritamente no texto das leis fornecido abaixo.
-4. Se a informação NÃO estiver no texto abaixo, diga textualmente: "Desculpe, não encontrei essa informação específica na legislação disponível. Recomendo consultar diretamente o órgão do IQUAMA." Não invente nenhum dado ou valor.
-
----
-TEXTO OFICIAL DAS LEIS DO IQUAMA:
-{texto_leis}
----
+2. Sempre cite o Artigo, Parágrafo, Item ou Anexo de onde retirou a informação.
+3. Se a informação NÃO estiver no texto fornecido pelo usuário, diga textualmente: "Desculpe, não encontrei essa informação específica na legislação disponível. Recomendo consultar diretamente o órgão do IQUAMA." Não invente dados.
 """
 
 # 4. Inicializar o histórico da conversa na tela
@@ -59,23 +54,24 @@ for message in st.session_state.messages:
 
 # 5. Onde o cidadão digita a pergunta
 if prompt := st.chat_input("Ex: Qual o valor da consulta prévia?"):
-    # Mostra a pergunta do cidadão
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Gera a resposta usando o Gemini 1.5 Flash
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         
         try:
+            # Mudamos para o gemini-2.5-flash que lida melhor com cotas gratuitas
             model = genai.GenerativeModel(
-                model_name="gemini-1.5-flash",
+                model_name="gemini-2.5-flash",
                 system_instruction=PROMPT_SISTEMA
             )
             
-            # Enviamos apenas a pergunta, pois a lei já está salva na memória do modelo
-            response = model.generate_content(prompt)
+            # Construímos o contexto juntando o texto das leis e a pergunta de forma limpa
+            contexto_mensagem = f"BASE DE LEIS DISPONÍVEL:\n{texto_leis}\n\nPERGUNTA DO CIDADÃO: {prompt}"
+            
+            response = model.generate_content(contexto_mensagem)
             
             texto_resposta = response.text
             message_placeholder.markdown(texto_resposta)
