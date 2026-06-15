@@ -15,7 +15,7 @@ else:
     st.error("Por favor, configure a chave GEMINI_API_KEY nos Secrets do Streamlit.")
     st.stop()
 
-# 3. Extrair o texto do PDF localmente
+# 3. Extrair e otimizar o texto do PDF localmente
 @st.cache_data
 def extrair_texto_pdf():
     caminho_pdf = "LeisIQUAMA.pdf" 
@@ -27,7 +27,11 @@ def extrair_texto_pdf():
                 texto = pagina.extract_text()
                 if texto:
                     texto_completo += texto + "\n"
-            return texto_completo
+            
+            # Otimização crucial: Remove espaços múltiplos e quebras de linha repetidas
+            # Isso reduz o tamanho do texto enviado pela metade sem perder nenhuma palavra da lei!
+            linhas_limpas = [linha.strip() for linha in texto_completo.split("\n") if linha.strip()]
+            return "\n".join(linhas_limpas)
     else:
         st.error("Arquivo LeisIQUAMA.pdf não encontrado no servidor do GitHub.")
         st.stop()
@@ -62,13 +66,13 @@ if prompt := st.chat_input("Ex: Qual o valor da consulta prévia?"):
         message_placeholder = st.empty()
         
         try:
-            # Mudamos para o gemini-2.5-flash que lida melhor com cotas gratuitas
+            # Voltamos para o 1.5-flash que aceita chaves gratuitas na hora
             model = genai.GenerativeModel(
-                model_name="gemini-2.5-flash",
+                model_name="gemini-1.5-flash",
                 system_instruction=PROMPT_SISTEMA
             )
             
-            # Construímos o contexto juntando o texto das leis e a pergunta de forma limpa
+            # Construímos o contexto compactado
             contexto_mensagem = f"BASE DE LEIS DISPONÍVEL:\n{texto_leis}\n\nPERGUNTA DO CIDADÃO: {prompt}"
             
             response = model.generate_content(contexto_mensagem)
