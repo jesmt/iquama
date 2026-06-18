@@ -17,6 +17,7 @@ lon = st.number_input("Longitude", format="%.6f")
 if st.button("Gerar Parecer"):
     # Carrega o mapa
     gdf = gpd.read_file("doc_67.kml")
+    gdf = gdf.to_crs(epsg=4326) # Isso força o mapa a "entender" latitude e longitude
     ponto = Point(lon, lat)
     
     # Busca a zona
