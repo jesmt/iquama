@@ -138,7 +138,7 @@ ultrapasse 15m, condicionado à obtenção da outorga onerosa.)  |
     | **Demais Índices** | Conforme regulação específica do COMAR ou os mesmos da ZEU na ausência desta. |
     """,
 
-    "ZEIS": """
+    "Zona Especial de Interesse Social": """
     ### 🤝 ZEIS - Zona Especial de Interesse Social
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
