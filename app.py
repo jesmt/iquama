@@ -1,152 +1,38 @@
 import streamlit as st
-from groq import Groq
-import os
-import pypdf
-from unidecode import unidecode
+import geopandas as gpd
+from shapely.geometry import Point
+import google.generativeai as genai
+import PyPDF2
 
-# 1. Configuração da página do Chatbot
-st.set_page_config(page_title="Assistente IQUAMA", page_icon="🤖")
-st.title("🤖 Assistente Virtual - Leis do IQUAMA")
-st.caption("Tire suas dúvidas sobre o Controle Urbanístico e Ambiental de Aracati.")
+# Configuração da IA (Use o 'Secrets' do Streamlit para não expor a chave)
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# 2. Configurar a chave da API da Groq
-if "GROQ_API_KEY" in st.secrets:
-    client = Groq(api_key=st.secrets["GROQ_API_KEY"])
-else:
-    st.error("Por favor, configure a chave GROQ_API_KEY nos Secrets do Streamlit.")
-    st.stop()
+st.title("Consultor de Zoneamento")
 
-# 3. Mapear o PDF por páginas separadas
-@st.cache_data
-def carregar_paginas_pdf():
-    caminho_pdf = "LeisIQUAMA.pdf" 
-    if os.path.exists(caminho_pdf):
-        with st.spinner("Carregando e indexando a base jurídica..."):
-            reader = pypdf.PdfReader(caminho_pdf)
-            paginas_mapeadas = []
-            for i, pagina in enumerate(reader.pages):
-                texto = pagina.extract_text()
-                if texto:
-                    # Limpa e guarda o texto associado ao número da página
-                    texto_limpo = " ".join(texto.split())
-                    paginas_mapeadas.append({"numero": i + 1, "texto": texto_limpo})
-            return paginas_mapeadas
+# Upload dos arquivos (caso não queira deixar fixo no repo)
+lat = st.number_input("Latitude", format="%.6f")
+lon = st.number_input("Longitude", format="%.6f")
+
+if st.button("Gerar Parecer"):
+    # Carrega o mapa
+    gdf = gpd.read_file("zoneamento_67.kmz")
+    ponto = Point(lon, lat)
+    
+    # Busca a zona
+    resultado = gdf[gdf.contains(ponto)]
+    
+    if not resultado.empty:
+        zona = resultado.iloc[0]['Name']
+        st.success(f"Zona encontrada: {zona}")
+        
+        # Leitura da lei
+        leitor = PyPDF2.PdfReader("lei_67_OCR.pdf")
+        texto_lei = "\n".join([p.extract_text() for p in leitor.pages])
+        
+        prompt = f"O imóvel está na zona {zona}. Baseado no texto da lei abaixo, gere um parecer técnico de viabilidade:\n\n{texto_lei[:15000]}"
+        
+        parecer = model.generate_content(prompt)
+        st.write(parecer.text)
     else:
-        st.error("Arquivo LeisIQUAMA.pdf não encontrado no servidor do GitHub.")
-        st.stop()
-
-base_paginas = carregar_paginas_pdf()
-
-# 4. NOVA FUNÇÃO DE BUSCA CALIBRADA (Evita o sufocamento de tabelas)
-def buscar_trechos_relevantes(pergunta, paginas, max_paginas=15): # Aumentado para 15 páginas (Groq aguenta fácil)
-    pergunta_limpa = unidecode(pergunta).lower()
-    
-    # Remove termos comuns irrelevantes e foca nas palavras de busca reais
-    palavras_chave = [p for p in pergunta_limpa.split() if len(p) > 2 and p not in ["qual", "como", "onde", "quem", "pelo", "pela"]] 
-    
-    if not palavras_chave:
-        return "Nenhum contexto específico selecionado."
-    
-    paginas_pontuadas = []
-    for p in paginas:
-        texto_pag_limpo = unidecode(p["texto"]).lower()
-        
-        # Identifica quantas palavras-chave diferentes da pergunta estão presentes nesta página
-        palavras_encontradas = [palavra for palavra in palavras_chave if palavra in texto_pag_limpo]
-        total_unicas = len(palavras_encontradas)
-        
-        if total_unicas == 0:
-            continue
-            
-        score = 0
-        
-        # CRUCIAL 1: Bônus por Cobertura/Diversidade (Mais palavras únicas = muito mais pontos)
-        # Isso impede que uma página que repete "consulta" 30 vezes vença de uma que tem "consulta", "prévia" e "valor" juntas.
-        proporcao_cobertura = total_unicas / len(palavras_chave)
-        score += proporcao_cobertura * 120
-        
-        # CRUCIAL 2: Contagem de repetição com limite (Capado em no máximo 4 para não inflar texto corrido)
-        for palavra in palavras_encontradas:
-            ocorrencias = texto_pag_limpo.count(palavra)
-            score += min(ocorrencias, 4) * 2 
-                
-        # CRUCIAL 3: Bônus por termos compostos exatos na ordem ("consulta previa")
-        for i in range(len(palavras_chave) - 1):
-            termo_composto = f"{palavras_chave[i]} {palavras_chave[i+1]}"
-            if termo_composto in texto_pag_limpo:
-                score += 40 
-
-        # CRUCIAL 4: Super Bônus de Tabelas Fiscais
-        # Se a página tiver palavras indicativas de tabelas de valores E pelo menos algumas palavras da pergunta
-        indicadores_tabela = ["anexo", "tabela", "ufirm", "item", "valor", "taxa", "rs", "tabelas"]
-        tem_indicador_tabela = any(ind in texto_pag_limpo for ind in indicadores_tabela)
-        
-        if tem_indicador_tabela and total_unicas >= 1:
-            score += 60 # Dá uma vantagem massiva para páginas que contêm tabelas/valores
-
-        paginas_pontuadas.append((score, p))
-            
-    # Ordena as páginas pelo novo Score ajustado
-    paginas_pontuadas.sort(key=lambda x: x[0], reverse=True)
-    
-    if not paginas_pontuadas:
-        return "Nenhum trecho correspondente encontrado no documento."
-        
-    trechos_selecionados = []
-    # Retorna o topo das páginas mais relevantes dentro do novo limite expandido
-    for score, p in paginas_pontuadas[:max_paginas]:
-        trechos_selecionados.append(f"[Página {p['numero']}]\n{p['texto']}")
-        
-    return "\n\n---\n\n".join(trechos_selecionados)
-
-# Instruções de comportamento para o Bot
-PROMPT_SISTEMA = """
-Você é um assistente virtual oficial para ajudar os cidadãos a tirarem dúvidas sobre as Leis de Controle Urbanístico e Ambiental (IQUAMA) de Aracati.
-Regras Cruciais:
-1. Seja extremamente preciso. Se a resposta estiver em uma tabela ou anexo, cite detalhadamente (Ex: "O valor é de X UFIRM, conforme o Item 10 da Tabela do Anexo III da Lei Complementar nº 017/2019").
-2. Sempre cite a Página, Artigo, Item ou Anexo de onde retirou a informação para dar segurança jurídica ao cidadão.
-3. Você deve se basear apenas nos fragmentos de lei fornecidos no contexto.
-4. Se a informação NÃO estiver explícita nos fragmentos fornecidos, diga textualmente: "Desculpe, não encontrei essa informação específica nos trechos da legislação consultados. Recomendo consultar diretamente o órgão do IQUAMA." Não invente dados ou valores.
-"""
-
-# 5. Inicializar o histórico da conversa na tela
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Mostrar mensagens anteriores na tela
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# 6. Onde o cidadão digita a pergunta
-if prompt := st.chat_input("Ex: Qual o valor da consulta prévia?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        
-        try:
-            # Busca dinamicamente apenas as páginas do PDF que importam para aquela pergunta
-            contexto_filtrado = buscar_trechos_relevantes(prompt, base_paginas)
-            
-            # Monta a mensagem final leve mas completa
-            contexto_mensagem = f"TRECHOS EXTRAÍDOS DA LEI:\n{contexto_filtrado}\n\nPERGUNTA DO CIDADÃO: {prompt}"
-            
-            # Chamada usando o modelo estável da Groq
-            chat_completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": PROMPT_SISTEMA},
-                    {"role": "user", "content": contexto_mensagem}
-                ],
-                model="llama-3.3-70b-versatile",
-                temperature=0.1,
-            )
-            
-            texto_resposta = chat_completion.choices[0].message.content
-            message_placeholder.markdown(texto_resposta)
-            st.session_state.messages.append({"role": "assistant", "content": texto_resposta})
-            
-        except Exception as e:
-            st.error(f"Erro ao processar a resposta da IA: {e}")
+        st.error("Coordenada fora da área mapeada.")
