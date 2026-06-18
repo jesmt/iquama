@@ -215,7 +215,8 @@ if st.button("Consultar Índices"):
 
         # 3. Executa a busca espacial
         ponto = Point(lon, lat)
-        resultado = gdf[gdf.geometry.contains(ponto)]
+        ponto_com_tolerancia = ponto.buffer(0.00001)
+        resultado = gdf[gdf.geometry.intersects(ponto_com_tolerancia)]
         
         if not resultado.empty:
             # ==========================================
