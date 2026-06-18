@@ -7,7 +7,8 @@ import pandas as pd
 
 # Configuração da IA
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Mude de 'gemini-1.5-flash' para este nome completo:
+model = genai.GenerativeModel('models/gemini-1.5-flash-002')
 
 st.title("Consultor de Zoneamento")
 
