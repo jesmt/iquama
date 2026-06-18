@@ -8,7 +8,6 @@ import os
 
 # ==============================================================================
 # CADASTRO DE DIRETRIZES URBANÍSTICAS (Lei Municipal de Aracati)
-# As chaves do dicionário devem corresponder ao nome que o seu KMZ exibe.
 # ==============================================================================
 DICIONARIO_ZONAS = {
     "ZPA": """
@@ -158,7 +157,7 @@ DICIONARIO_ZONAS = {
 st.title("📍 Consultor de Zoneamento Automático")
 st.write("Insira as coordenadas para descobrir os índices urbanísticos instantaneamente.")
 
-# Coordenadas padrão (Ex: Matriz de Aracati)
+# Coordenadas padrão
 lat = st.number_input("Latitude", format="%.6f", value=-4.5606)
 lon = st.number_input("Longitude", format="%.6f", value=-37.7712)
 
@@ -213,10 +212,9 @@ if st.button("Consultar Índices"):
             # ==========================================
             # MODO DEBUG: Vê todas as zonas que se sobrepõem
             # ==========================================
-            # Pega o nome de todas as camadas que o ponto furou
             todas_as_zonas = resultado['zona'].dropna().unique().tolist()
             
-            st.info(f"🔍 **DEBUG:** Esta coordenada toca em {len(todas_as_zonas)} polígono(s) ao mesmo tempo: {todas_as_zonas}")
+            st.info(f"🔍 **Detalhe de Sobreposição:** Esta coordenada intercepta {len(todas_as_zonas)} polígono(s): {todas_as_zonas}")
             
             # Se tocar em mais de uma, tenta ignorar a "Zona Rural" para dar preferência à zona urbana específica
             if len(todas_as_zonas) > 1 and "Zona Rural" in todas_as_zonas:
@@ -236,36 +234,37 @@ if st.button("Consultar Índices"):
             # Exibe a tabela na tela
             st.markdown(dados_urbanisticos)
             
-            # (Aqui continua o código do botão de download que fizemos antes...)
+            # ==========================================
+            # GERAÇÃO DO PARECER PARA DOWNLOAD
+            # ==========================================
+            st.write("---")
+            st.subheader("🖨️ Exportar Resultado")
+            
+            texto_parecer = f"""==================================================
+        PARECER TÉCNICO DE ZONEAMENTO
+==================================================
+
+DADOS DA CONSULTA:
+- Latitude: {lat}
+- Longitude: {lon}
+- Zoneamento Identificado: {nome_da_zona}
+
+{dados_urbanisticos}
+
+==================================================
+Documento gerado automaticamente pelo sistema de 
+Consulta de Zoneamento Municipal.
+=================================================="""
+            
+            st.download_button(
+                label="📄 Baixar Parecer Técnico (.txt)",
+                data=texto_parecer,
+                file_name=f"Parecer_Zoneamento_{nome_da_zona.replace(' ', '_')}.txt",
+                mime="text/plain"
+            )
             
         else:
             st.error("Coordenada fora da área mapeada.")
 
-
-    
-        '''
-        # 3. Executa a busca espacial
-        ponto = Point(lon, lat)
-        resultado = gdf[gdf.geometry.contains(ponto)]
-        
-        if not resultado.empty:
-            nome_da_zona = resultado.iloc[0].get('zona', resultado.iloc[0].get('Name', 'Zona Indefinida'))
-            st.success(f"📍 Imóvel localizado na: **{nome_da_zona}**")
-            
-            st.write("---")
-            # 4. Busca os índices no dicionário local
-            # Se o nome exato da zona não estiver cadastrado no dicionário, avisa o usuário
-            dados_urbanisticos = DICIONARIO_ZONAS.get(nome_da_zona, f"⚠️ Os parâmetros para a **{nome_da_zona}** ainda não foram cadastrados no código.")
-            
-            # Exibe a tabela formatada na tela
-            st.markdown(dados_urbanisticos)
-                
-        else:
-            st.error("Coordenada fora da área mapeada.")
-            st.write("---")
-            st.write(f"DEBUG: O mapa possui {len(gdf)} polígonos divididos em: {layer_names}")
-            
     except Exception as e:
-        st.error(f"Erro ao processamento o mapa: {e}")'''
-
-
+        st.error(f"Erro ao processar o mapa: {e}")
