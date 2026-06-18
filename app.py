@@ -63,7 +63,7 @@ DICIONARIO_ZONAS = {
     | **Testada Mínima** | 6,00m  |
     """,
 
-    "ZEU": """
+    "Zona de Expansão Urbana": """
     ### 📈 ZEU - Zona de Expansão Urbana
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
