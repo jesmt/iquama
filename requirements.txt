@@ -1,5 +1,6 @@
 streamlit
 geopandas
 shapely
-google-generativeai
-pypdf2
+google-generativeai>=0.7.0
+PyPDF2
+pandas
