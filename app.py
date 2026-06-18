@@ -10,7 +10,7 @@ import os
 # CADASTRO DE DIRETRIZES URBANÍSTICAS (Lei Municipal de Aracati)
 # ==============================================================================
 DICIONARIO_ZONAS = {
-    "ZPA": """
+    "Zona de Preservação Ambiental": """
     ### 🌿 ZPA - Zona de Preservação Ambiental
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
@@ -18,25 +18,29 @@ DICIONARIO_ZONAS = {
     | **Taxa de Permeabilidade (T.P)** | 100%  |
     """,
 
-    "ZOC": """
+    "Zona de Ocupação Controlada": """
     ### 🏘️ ZOC - Zona de Ocupação Controlada
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
     | **Índice de Aproveitamento Básico** | 0,5  |
     | **Taxa de Permeabilidade (T.P)** | 60%  |
     | **Recuo Frontal** | 3,00m  |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
     | **Área Mínima do Lote** | 300m²  |
     | **Testada Mínima** | 8,00m  |
     
-    *Nota: Para templos religiosos, a T.P mínima é de 15%.*
+   
     """,
 
-    "ZUS": """
+    "Zona de Uso Sustentável": """
     ### 🌾 ZUS - Zona de Uso Sustentável
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Parâmetros Gerais** | Os índices devem seguir estritamente a Legislação Específica da Unidade de Conservação. |
+    | **Índice de Aproveitamento Básico** | Parâmetros conforme Legislação Específica da unida.de de conservação. |
+    | **Taxa de Permeabilidade (T.P)** | Parâmetros conforme Legislação Específica da unida.de de conservação. |
+    | **Recuo Frontal** | Parâmetros conforme Legislação Específica da unida.de de conservação. |
+    | **Fundos e Laterais** | Parâmetros conforme Legislação Específica da unida.de de conservação. |
+    | **Área Mínima do Lote** | Parâmetros conforme Legislação Específica da unida.de de conservação. |
+    | **Testada Mínima** | 8,00m  |
     """,
 
     "Zona de Desenvolvimento Urbano 1": """
@@ -45,22 +49,26 @@ DICIONARIO_ZONAS = {
     | :--- | :--- |
     | **Índice de Aproveitamento Básico** | 1,5  |
     | **Taxa de Permeabilidade (T.P)** | 30%  |
-    | **Recuo Frontal** | Suficiente para liberar calçada de 4,00m (vias locais) ou 5,00m (vias do Sist. Viário Básico)  |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
+    | **Recuo Frontal** | O recuo frontal exígido será o suficiente para liberar uma calçada mínima de
+4,00m (quatro metros) nas vias locais e 5,00m (cinco metros) nas vias componentes do Sistema Viário Básico Municipal  |
+    | **Gabarito Máximo** | 10,00m (o gabarito máximo poderá ser elevado para até 13 metros até a laje de coberta do último pavimento habitável, desde que a altura até o topo da edificação não
+ultrapasse 15m, condicionado à obtenção da outorga onerosa.)  |
     | **Área Mínima do Lote** | 150m²  |
-    | **Testada Mínima** | 8,00m |
+    | **Testada Mínima** | 6,00m |
     """,
 
-    "ZDU 2": """
+    "Zona de Desenvolvimento Urbano 2": """
     ### 🏙️ ZDU 2 - Zona de Desenvolvimento Urbano 2
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
     | **Índice de Aproveitamento Básico** | 1,5  |
     | **Taxa de Permeabilidade (T.P)** | 30% |
     | **Recuo Frontal** | 3,00m  |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) |
-    | **Área Mínima do Lote** | 175m² (Lotes menores que 200m² consolidados antes desta lei são aceitos com certidão)  |
-    | **Testada Mínima** | 6,00m  |
+    | **Gabarito Máximo** | 10,00m (o gabarito máximo poderá ser elevado para até 13 metros até a laje de coberta do último pavimento habitável, desde que a altura até o topo da edificação não
+ultrapasse 15m, condicionado à obtenção da outorga onerosa.)  |
+    | **Área Mínima do Lote** | 175m² (Nos casos de parcelamento com área consolidada inferior a 200m², realizado antes da vígência desta lei, deverá ser apresentada comprovação por meio de certidões emitidas pelo cartório competente com data anterior à
+publicação desta lei.)  |
+    | **Testada Mínima** | 7,00m  |
     """,
 
     "Zona de Expansão Urbana": """
@@ -70,12 +78,13 @@ DICIONARIO_ZONAS = {
     | **Índice de Aproveitamento Básico** | 1,0 |
     | **Taxa de Permeabilidade (T.P)** | 30% |
     | **Recuo Frontal** | 3,00m |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
+    | **Gabarito Máximo** | 10,00m (o gabarito máximo poderá ser elevado para até 13 metros até a laje de coberta do último pavimento habitável, desde que a altura até o topo da edificação não
+ultrapasse 15m, condicionado à obtenção da outorga onerosa.)  |
     | **Área Mínima do Lote** | 200m²  |
     | **Testada Mínima** | 8,00m  |
     """,
 
-    "ZT 1": """
+    "Zona de Transição 1": """
     ### 🔄 ZT 1 - Zona de Transição 1
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
