@@ -15,140 +15,140 @@ DICIONARIO_ZONAS = {
     ### 🌿 ZPA - Zona de Preservação Ambiental
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 0 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 100% [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 0  |
+    | **Taxa de Permeabilidade (T.P)** | 100%  |
     """,
 
     "ZOC": """
     ### 🏘️ ZOC - Zona de Ocupação Controlada
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 0,5 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 60% [cite: 3] |
-    | **Recuo Frontal** | 3,00m [cite: 3] |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) [cite: 3, 18, 19] |
-    | **Área Mínima do Lote** | 300m² [cite: 3] |
-    | **Testada Mínima** | 8,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 0,5  |
+    | **Taxa de Permeabilidade (T.P)** | 60%  |
+    | **Recuo Frontal** | 3,00m  |
+    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
+    | **Área Mínima do Lote** | 300m²  |
+    | **Testada Mínima** | 8,00m  |
     
-    *Nota: Para templos religiosos, a T.P mínima é de 15%[cite: 27].*
+    *Nota: Para templos religiosos, a T.P mínima é de 15%.*
     """,
 
     "ZUS": """
     ### 🌾 ZUS - Zona de Uso Sustentável
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Parâmetros Gerais** | Os índices devem seguir estritamente a Legislação Específica da Unidade de Conservação[cite: 3, 13]. |
+    | **Parâmetros Gerais** | Os índices devem seguir estritamente a Legislação Específica da Unidade de Conservação. |
     """,
 
     "ZDU 1": """
     ### 🏙️ ZDU 1 - Zona de Desenvolvimento Urbano 1
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 1,5 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 30% [cite: 3] |
-    | **Recuo Frontal** | Suficiente para liberar calçada de 4,00m (vias locais) ou 5,00m (vias do Sist. Viário Básico) [cite: 3, 10] |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) [cite: 3, 18, 19] |
-    | **Área Mínima do Lote** | 150m² [cite: 3] |
-    | **Testada Mínima** | 8,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 1,5  |
+    | **Taxa de Permeabilidade (T.P)** | 30%  |
+    | **Recuo Frontal** | Suficiente para liberar calçada de 4,00m (vias locais) ou 5,00m (vias do Sist. Viário Básico)  |
+    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
+    | **Área Mínima do Lote** | 150m²  |
+    | **Testada Mínima** | 8,00m |
     """,
 
     "ZDU 2": """
     ### 🏙️ ZDU 2 - Zona de Desenvolvimento Urbano 2
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 1,5 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 30% [cite: 3] |
-    | **Recuo Frontal** | 3,00m [cite: 3] |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) [cite: 3, 18, 19] |
-    | **Área Mínima do Lote** | 175m² (Lotes menores que 200m² consolidados antes desta lei são aceitos com certidão) [cite: 3, 20] |
-    | **Testada Mínima** | 6,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 1,5  |
+    | **Taxa de Permeabilidade (T.P)** | 30% |
+    | **Recuo Frontal** | 3,00m  |
+    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) |
+    | **Área Mínima do Lote** | 175m² (Lotes menores que 200m² consolidados antes desta lei são aceitos com certidão)  |
+    | **Testada Mínima** | 6,00m  |
     """,
 
     "ZEU": """
     ### 📈 ZEU - Zona de Expansão Urbana
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 1,0 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 30% [cite: 3] |
-    | **Recuo Frontal** | 3,00m [cite: 3] |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) [cite: 3, 18, 19] |
-    | **Área Mínima do Lote** | 200m² [cite: 3] |
-    | **Testada Mínima** | 7,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 1,0 |
+    | **Taxa de Permeabilidade (T.P)** | 30% |
+    | **Recuo Frontal** | 3,00m |
+    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
+    | **Área Mínima do Lote** | 200m²  |
+    | **Testada Mínima** | 7,00m  |
     """,
 
     "ZT 1": """
     ### 🔄 ZT 1 - Zona de Transição 1
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 1,5 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 30% [cite: 3] |
-    | **Recuo Frontal** | 3,00m [cite: 3] |
-    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) [cite: 3, 18, 19] |
-    | **Área Mínima do Lote** | 150m² [cite: 3] |
-    | **Testada Mínima** | 8,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 1,5  |
+    | **Taxa de Permeabilidade (T.P)** | 30% |
+    | **Recuo Frontal** | 3,00m  |
+    | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa) |
+    | **Área Mínima do Lote** | 150m²  |
+    | **Testada Mínima** | 8,00m  |
     """,
 
     "ZT 2": """
     ### 🔄 ZT 2 - Zona de Transição 2
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 0,5 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 50% [cite: 3] |
-    | **Recuo Frontal** | 3,00m [cite: 3] |
-    | **Gabarito Máximo** | 8,50m [cite: 3, 18] |
-    | **Área Mínima do Lote** | 200m² [cite: 3] |
-    | **Testada Mínima** | 6,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 0,5 |
+    | **Taxa de Permeabilidade (T.P)** | 50%  |
+    | **Recuo Frontal** | 3,00m |
+    | **Gabarito Máximo** | 8,50m  |
+    | **Área Mínima do Lote** | 200m²  |
+    | **Testada Mínima** | 6,00m  |
     """,
 
     "Zona Especial de Desenvolvimento Econômico e Turístico": """
     ### 🏖️ ZEDET - Zona Especial de Desenvolvimento Econômico e Turístico
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 1,5 [cite: 3] |
-    | **Taxa de Permeabilidade (T.P)** | 30% [cite: 3] |
-    | **Recuo Frontal** | Suficiente para liberar calçada de 4,00m (vias locais) ou 5,00m (vias do Sist. Viário Básico) [cite: 3, 10] |
-    | **Gabarito Máximo** | Elevável para 10m (laje) ou 12m (topo) com Outorga Onerosa[cite: 3, 25]. Em Majorlândia, base é 10m podendo ir a 13m/15m[cite: 26]. |
-    | **Área Mínima do Lote** | 125m² [cite: 3] |
-    | **Testada Mínima** | 8,00m [cite: 3] |
+    | **Índice de Aproveitamento Básico** | 1,5  |
+    | **Taxa de Permeabilidade (T.P)** | 30% |
+    | **Recuo Frontal** | Suficiente para liberar calçada de 4,00m (vias locais) ou 5,00m (vias do Sist. Viário Básico) |
+    | **Gabarito Máximo** | Elevável para 10m (laje) ou 12m (topo) com Outorga Onerosa. Em Majorlândia, base é 10m podendo ir a 13m/15m. |
+    | **Área Mínima do Lote** | 125m²  |
+    | **Testada Mínima** | 8,00m |
     
-    *Nota: Em Canoa Quebrada e Beirada, prevalecem os parâmetros de lei específica da APA[cite: 3, 17].*
+    *Nota: Em Canoa Quebrada e Beirada, prevalecem os parâmetros de lei específica da APA.*
     """,
 
     "ZEIC": """
     ### 🏛️ ZEIC - Zona Especial de Interesse Cultural
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Testada Mínima** | 8,00m [cite: 8] |
-    | **Demais Índices** | Conforme Seção II do Cap IV da lei e portarias específicas[cite: 8, 14]. |
+    | **Testada Mínima** | 8,00m |
+    | **Demais Índices** | Conforme Seção II do Cap IV da lei e portarias específicas. |
     """,
 
     "ZEA": """
     ### ✈️ ZEA - Zona Especial Aeroportuária
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Testada Mínima** | 6,00m [cite: 8] |
-    | **Demais Índices** | Conforme regulação específica do COMAR ou os mesmos da ZEU na ausência desta[cite: 8, 15]. |
+    | **Testada Mínima** | 6,00m  |
+    | **Demais Índices** | Conforme regulação específica do COMAR ou os mesmos da ZEU na ausência desta. |
     """,
 
     "ZEIS": """
     ### 🤝 ZEIS - Zona Especial de Interesse Social
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Gabarito Máximo** | 10,00m (Podendo chegar a 13m na laje/15m topo com Outorga Onerosa) [cite: 8, 18, 19] |
-    | **Testada Mínima** | 5,00m [cite: 8] |
-    | **Demais Índices** | Definidos no Projeto de Regularização (ou opção pela zona lindeira se não houver projeto)[cite: 8, 16]. |
+    | **Gabarito Máximo** | 10,00m (Podendo chegar a 13m na laje/15m topo com Outorga Onerosa) |
+    | **Testada Mínima** | 5,00m |
+    | **Demais Índices** | Definidos no Projeto de Regularização (ou opção pela zona lindeira se não houver projeto). |
     
-    *Nota: Podem ser suprimidos área mínima e testada se promovido pelo poder público[cite: 24].*
+    *Nota: Podem ser suprimidos área mínima e testada se promovido pelo poder público.*
     """,
 
     "ZI": """
     ### 🏭 ZI - Zona Industrial
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
-    | **Índice de Aproveitamento Básico** | 2,0 [cite: 8] |
-    | **Taxa de Permeabilidade (T.P)** | 30% [cite: 8] |
-    | **Gabarito Máximo** | 10,00m [cite: 8, 18] |
-    | **Testada Mínima** | 8,00m [cite: 8] |
+    | **Índice de Aproveitamento Básico** | 2,0  |
+    | **Taxa de Permeabilidade (T.P)** | 30%  |
+    | **Gabarito Máximo** | 10,00m |
+    | **Testada Mínima** | 8,00m |
     """
 }
 
