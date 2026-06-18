@@ -141,7 +141,7 @@ DICIONARIO_ZONAS = {
     *Nota: Podem ser suprimidos área mínima e testada se promovido pelo poder público.*
     """,
 
-    "ZI": """
+    "Zona Industrial": """
     ### 🏭 ZI - Zona Industrial
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
@@ -204,8 +204,47 @@ if st.button("Consultar Índices"):
         
         gdf = gdf.to_crs(epsg=4326)
         os.unlink(tmp_path)  # Limpa o arquivo temporário
-        
+
         # 3. Executa a busca espacial
+        ponto = Point(lon, lat)
+        resultado = gdf[gdf.geometry.contains(ponto)]
+        
+        if not resultado.empty:
+            # ==========================================
+            # MODO DEBUG: Vê todas as zonas que se sobrepõem
+            # ==========================================
+            # Pega o nome de todas as camadas que o ponto furou
+            todas_as_zonas = resultado['zona'].dropna().unique().tolist()
+            
+            st.info(f"🔍 **DEBUG:** Esta coordenada toca em {len(todas_as_zonas)} polígono(s) ao mesmo tempo: {todas_as_zonas}")
+            
+            # Se tocar em mais de uma, tenta ignorar a "Zona Rural" para dar preferência à zona urbana específica
+            if len(todas_as_zonas) > 1 and "Zona Rural" in todas_as_zonas:
+                todas_as_zonas.remove("Zona Rural")
+                
+            # Seleciona a zona final (a mais específica)
+            nome_da_zona = todas_as_zonas[0]
+            # ==========================================
+
+            st.success(f"📍 Imóvel localizado na: **{nome_da_zona}**")
+            
+            st.write("---")
+            
+            # Busca os índices no dicionário local
+            dados_urbanisticos = DICIONARIO_ZONAS.get(nome_da_zona, f"⚠️ Os parâmetros para a **{nome_da_zona}** ainda não foram cadastrados.")
+            
+            # Exibe a tabela na tela
+            st.markdown(dados_urbanisticos)
+            
+            # (Aqui continua o código do botão de download que fizemos antes...)
+            
+        else:
+            st.error("Coordenada fora da área mapeada.")
+
+
+    
+        
+       ''' # 3. Executa a busca espacial
         ponto = Point(lon, lat)
         resultado = gdf[gdf.geometry.contains(ponto)]
         
@@ -227,4 +266,6 @@ if st.button("Consultar Índices"):
             st.write(f"DEBUG: O mapa possui {len(gdf)} polígonos divididos em: {layer_names}")
             
     except Exception as e:
-        st.error(f"Erro ao processamento o mapa: {e}")
+        st.error(f"Erro ao processamento o mapa: {e}")'''
+
+
