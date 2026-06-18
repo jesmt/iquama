@@ -15,10 +15,26 @@ lat = st.number_input("Latitude", format="%.6f")
 lon = st.number_input("Longitude", format="%.6f")
 
 if st.button("Gerar Parecer"):
-    # Carrega o mapa
+    '''# Carrega o mapa
     gdf = gpd.read_file("doc_67.kml")
     gdf = gdf.to_crs(epsg=4326) # Isso força o mapa a "entender" latitude e longitude
+    ponto = Point(lon, lat)'''
+    # Carrega o mapa
+    gdf = gpd.read_file("doc_67.kml")
+    
+    # DEBUG: Mostra o sistema de coordenadas no app
+    st.write(f"CRS atual do mapa: {gdf.crs}")
+    
+    # Força a conversão para WGS84 (Lat/Long)
+    gdf = gdf.to_crs(epsg=4326)
+    
     ponto = Point(lon, lat)
+    
+    # Verifica em qual polígono o ponto está
+    resultado = gdf[gdf.contains(ponto)]
+    
+    # DEBUG: Mostra as colunas do seu KML para sabermos qual o nome da zona
+    st.write("Colunas disponíveis no arquivo:", gdf.columns.tolist())
     
     # Busca a zona
     resultado = gdf[gdf.contains(ponto)]
