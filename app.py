@@ -243,8 +243,8 @@ if st.button("Consultar Índices"):
 
 
     
-        
-       ''' # 3. Executa a busca espacial
+        '''
+        # 3. Executa a busca espacial
         ponto = Point(lon, lat)
         resultado = gdf[gdf.geometry.contains(ponto)]
         
