@@ -3,53 +3,45 @@ import geopandas as gpd
 from shapely.geometry import Point
 import google.generativeai as genai
 import PyPDF2
+import pandas as pd  # IMPORTANTE: Adicionado!
 
-# Configuração da IA (Use o 'Secrets' do Streamlit para não expor a chave)
+# Configuração da IA
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 st.title("Consultor de Zoneamento")
 
-# Upload dos arquivos (caso não queira deixar fixo no repo)
 lat = st.number_input("Latitude", format="%.6f")
 lon = st.number_input("Longitude", format="%.6f")
 
 if st.button("Gerar Parecer"):
-    '''# Carrega o mapa
+    # 1. Carrega o mapa
     gdf = gpd.read_file("doc_67.kml")
-    gdf = gdf.to_crs(epsg=4326) # Isso força o mapa a "entender" latitude e longitude
-    ponto = Point(lon, lat)'''
-    # Carrega o mapa
-    gdf = gpd.read_file("doc_67.kml")
-    
-    # DEBUG: Mostra o sistema de coordenadas no app
-    st.write(f"CRS atual do mapa: {gdf.crs}")
-    
-    # Força a conversão para WGS84 (Lat/Long)
     gdf = gdf.to_crs(epsg=4326)
     
-    ponto = Point(lon, lat)
+    # IMPORTANTE: O Shapely usa Point(longitude, latitude)
+    # Se você está digitando a Latitude primeiro no input, inverta aqui:
+    ponto = Point(lon, lat) 
     
-    # Verifica em qual polígono o ponto está
-    resultado = gdf[gdf.contains(ponto)]
-    
-    # DEBUG: Mostra as colunas do seu KML para sabermos qual o nome da zona
-    st.write("Colunas disponíveis no arquivo:", gdf.columns.tolist())
-    
-    # Busca a zona
-    resultado = gdf[gdf.contains(ponto)]
+    # 2. Verifica em qual polígono o ponto está
+    resultado = gdf[gdf.geometry.contains(ponto)]
     
     if not resultado.empty:
-        zona = resultado.iloc[0]['Name']
-        st.success(f"Zona encontrada: {zona}")
+        # Pega o nome da zona (tenta coluna 'zona', se não, 'Name')
+        nome_da_zona = resultado.iloc[0]['zona'] if 'zona' in resultado.columns and pd.notna(resultado.iloc[0]['zona']) else resultado.iloc[0]['Name']
+        st.success(f"Imóvel localizado na: **{nome_da_zona}**")
         
-        # Leitura da lei
+        # 3. Leitura da lei
         leitor = PyPDF2.PdfReader("lei_67_OCR.pdf")
         texto_lei = "\n".join([p.extract_text() for p in leitor.pages])
         
-        prompt = f"O imóvel está na zona {zona}. Baseado no texto da lei abaixo, gere um parecer técnico de viabilidade:\n\n{texto_lei[:15000]}"
+        # 4. Geração do parecer
+        prompt = f"O imóvel está na zona {nome_da_zona}. Baseado no texto da lei abaixo, gere um parecer técnico de viabilidade:\n\n{texto_lei[:15000]}"
         
-        parecer = model.generate_content(prompt)
-        st.write(parecer.text)
+        with st.spinner("Gerando parecer técnico..."):
+            parecer = model.generate_content(prompt)
+            st.markdown(parecer.text)
     else:
         st.error("Coordenada fora da área mapeada.")
+        st.write("Dica: Verifique se a latitude e longitude não foram invertidas.")
+        st.write("Limites do primeiro polígono do seu mapa:", gdf.geometry.iloc[0].bounds)
