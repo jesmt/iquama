@@ -39,7 +39,7 @@ DICIONARIO_ZONAS = {
     | **Parâmetros Gerais** | Os índices devem seguir estritamente a Legislação Específica da Unidade de Conservação. |
     """,
 
-    "ZDU 1": """
+    "Zona de Desenvolvimento Urbano 1": """
     ### 🏙️ ZDU 1 - Zona de Desenvolvimento Urbano 1
     | Parâmetro Urbanístico | Índice Permitido |
     | :--- | :--- |
@@ -214,7 +214,7 @@ if st.button("Consultar Índices"):
             # ==========================================
             todas_as_zonas = resultado['zona'].dropna().unique().tolist()
             
-            st.info(f"🔍 **Detalhe de Sobreposição:** Esta coordenada intercepta {len(todas_as_zonas)} polígono(s): {todas_as_zonas}")
+            #st.info(f"🔍 **Detalhe de Sobreposição:** Esta coordenada intercepta {len(todas_as_zonas)} polígono(s): {todas_as_zonas}")
             
             # Se tocar em mais de uma, tenta ignorar a "Zona Rural" para dar preferência à zona urbana específica
             if len(todas_as_zonas) > 1 and "Zona Rural" in todas_as_zonas:
