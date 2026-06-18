@@ -72,7 +72,7 @@ DICIONARIO_ZONAS = {
     | **Recuo Frontal** | 3,00m |
     | **Gabarito Máximo** | 10,00m (Pode ser elevado até 13m na laje ou 15m no topo com Outorga Onerosa)  |
     | **Área Mínima do Lote** | 200m²  |
-    | **Testada Mínima** | 7,00m  |
+    | **Testada Mínima** | 8,00m  |
     """,
 
     "ZT 1": """
