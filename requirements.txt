@@ -1,5 +1,5 @@
-google-generativeai
 streamlit
-pypdf
-groq
-unidecode
+geopandas
+shapely
+google-generativeai
+pypdf2
